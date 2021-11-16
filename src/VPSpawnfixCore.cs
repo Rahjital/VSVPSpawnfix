@@ -11,8 +11,6 @@ namespace VanillaPatch.Spawnfix
     {
         Harmony harmony;
 
-        public override double ExecuteOrder() => 1.0;
-
         public override void StartServerSide(ICoreServerAPI api)
         {
             if (harmony == null) {
@@ -22,9 +20,14 @@ namespace VanillaPatch.Spawnfix
         }
 
         // Don't dispose of Harmony, we only want to patch on first start
-        /*public override void Dispose()
+        public override void Dispose()
         {
-            harmony = null;
-        }*/
+            if (harmony != null)
+            {
+                ServerEventManagerPatch.Dispose();
+                harmony.UnpatchAll(harmony.Id);
+                harmony = null;
+            }
+        }
     }
 }

@@ -57,5 +57,11 @@ namespace VanillaPatch.Spawnfix
 
             return false;
         }
+
+        public static void Dispose()
+        {
+            OnTrySpawnEntityDelegate = null;
+            initialised = false;
+        }
     }
 }
