@@ -3,7 +3,7 @@
         <AssemblyTitle>VanillaPatchSpawnfix</AssemblyTitle>
         <Authors>Rahjital</Authors>
         <Version>1.0.0</Version>
-        <Description>A tiny serevr-side patch mod to fix issues with entity spawning API.</Description>
+        <Description>A tiny server-side patch mod to fix issues with entity spawning API.</Description>
         <RepositoryUrl>https://github.com/Rahjital/VSVPSpawnfix</RepositoryUrl>
         <TargetFramework>net461</TargetFramework>
         <LangVersion>latest</LangVersion>
