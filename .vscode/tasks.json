@@ -1,0 +1,90 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clean",
+            "group": "none",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile",
+            "type": "shell",
+            "command": "dotnet",
+            "linux": {
+                "options": {
+                    "env": {
+                        "FrameworkPathOverride": "/lib/mono/4.6.1-api/"
+                    }
+                }
+            },
+            "args": [
+                "clean"
+            ]
+        },
+        {
+            "label": "build (Debug)",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile",
+            "type": "shell",
+            "command": "dotnet",
+            "linux": {
+                "options": {
+                    "env": {
+                        "FrameworkPathOverride": "/lib/mono/4.6.1-api/"
+                    }
+                }
+            },
+            "args": [
+                "build",
+                "-c",
+                "Debug",
+                "/property:GenerateFullPaths=true"
+            ]
+        },
+        {
+            "label": "build (Release)",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile",
+            "type": "shell",
+            "command": "dotnet",
+            "linux": {
+                "options": {
+                    "env": {
+                        "FrameworkPathOverride": "/lib/mono/4.6.1-api/"
+                    }
+                }
+            },
+            "args": [
+                "build",
+                "-c",
+                "Release"
+            ]
+        },
+        {
+            "label": "Prepare Server (Survival, .NET)",
+            "type": "shell",
+            "command": "$path = '\"{WorldConfig:{SaveFileLocation:''${env:VINTAGE_STORY_DATA}/multi_server/Saves/Survival ${workspaceFolderBasename}.vcdbs'',PlayStyle:''surviveandbuild'',WorldType:''standard'',DefaultRoleCode:''suplayer''}}\"'; & '${env:VINTAGE_STORY}/VintagestoryServer.exe' --dataPath '${env:VINTAGE_STORY_DATA}/multi_server' --setconfig $path.Replace('\\', '/'); exit",
+            "dependsOrder": "sequence",
+            "dependsOn": ["build (Debug)"]
+        },
+        {
+            "label": "Prepare Server (Superflat, .NET)",
+            "type": "shell",
+            "command": "$path = '\"{WorldConfig:{SaveFileLocation:''${env:VINTAGE_STORY_DATA}/multi_server/Saves/Superflat ${workspaceFolderBasename}.vcdbs'',PlayStyle:''creativebuilding'',WorldType:''superflat'',DefaultRoleCode:''crplayer''}}\"'; & '${env:VINTAGE_STORY}/VintagestoryServer.exe' --dataPath '${env:VINTAGE_STORY_DATA}/multi_server' --setconfig $path.Replace('\\', '/'); exit",
+            "dependsOrder": "sequence",
+            "dependsOn": ["build (Debug)"]
+        }
+    ]
+  }

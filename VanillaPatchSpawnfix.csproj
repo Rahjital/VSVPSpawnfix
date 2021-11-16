@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <AssemblyTitle>VanillaPatchSpawnfix</AssemblyTitle>
+        <Authors>Rahjital</Authors>
+        <Version>1.0.0</Version>
+        <Description>A tiny serevr-side patch mod to fix issues with entity spawning API</Description>
+        <RepositoryUrl></RepositoryUrl>
+        <TargetFramework>net461</TargetFramework>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VSVersion>1.15.9</VSVersion>
+        <GameSide>server</GameSide>
+        <ModWebsite></ModWebsite>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="VintagestoryAPI">
+            <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="VSEssentials">
+            <HintPath>$(VINTAGE_STORY)/Mods/VSEssentials.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="VSSurvivalMod">
+            <HintPath>$(VINTAGE_STORY)/Mods/VSSurvivalMod.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="VintagestoryLib">
+            <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="0Harmony">
+            <HintPath>$(VINTAGE_STORY)/Lib/0Harmony.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+    <PropertyGroup>
+        <ModInfo>
+{
+	"type": "code",
+	"name": "$(AssemblyTitle)",
+	"modid": "$(AssemblyTitle.ToLower())",
+	"version": "$(Version)",
+    "side": "$(GameSide)",
+
+	"description": "$(Description)",
+	"website": "$(ModWebsite)",
+	"authors": [ "$(Authors)" ],
+
+	"dependencies": {
+		"game": "$(VSVersion)"
+	}
+}
+        </ModInfo>
+    </PropertyGroup>
+    <ItemGroup>
+        <ModAssets Include="$(MSBuildProjectDirectory)/resources/assets/**/*.*"/>
+    </ItemGroup>
+    <Target Name="BaseTarget">
+        <WriteLinesToFile File="$(MSBuildProjectDirectory)/resources/modinfo.json" Lines="$(ModInfo)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildProjectDirectory)/staged/$(TargetName)"/>
+        <Copy SourceFiles="$(TargetDir)/$(TargetName).pdb" DestinationFolder="$(MSBuildProjectDirectory)/staged/$(TargetName)"/>
+        <Copy SourceFiles="@(ModAssets)" DestinationFolder="$(MSBuildProjectDirectory)/staged/$(TargetName)/assets/%(RecursiveDir)" SkipUnchangedFiles="true"/>
+        
+        <!-- Remove stale staged files (modified from https://stackoverflow.com/questions/46161651/safely-remove-stale-files-with-msbuild)  -->
+        <PropertyGroup>
+            <DSChar>$([System.IO.Path]::DirectorySeparatorChar)</DSChar>
+        </PropertyGroup>
+        <ItemGroup>
+            <SourceAssets Include="@(ModAssets->'$(MSBuildProjectDirectory)$(DSChar)staged$(DSChar)$(TargetName)$(DSChar)assets$(DSChar)%(RecursiveDir)%(Filename)%(Extension)')" />
+            <StagedAssets Include="$(MSBuildProjectDirectory)/staged/$(TargetName)/assets/**/*.*"/>
+            <StaleAssets Include="@(StagedAssets)" Exclude="@(SourceAssets)" />
+        </ItemGroup>
+        <Message Text="Deleting Stale Files: @(StaleAssets, '%0A')" Condition="'@(StaleAssets->Count())' > 0" importance="high"/>
+        <Delete Files="@(StaleAssets)"/>   
+
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/resources/modinfo.json" DestinationFolder="$(MSBuildProjectDirectory)/staged/$(TargetName)" SkipUnchangedFiles="true"/>
+    </Target>
+    <Target Name="DebugTarget" AfterTargets="PostBuildEvent" DependsOnTargets="BaseTarget" Condition="'$(Configuration)' == 'Debug'"></Target>
+    <Target Name="ReleaseTarget" AfterTargets="PostBuildEvent" DependsOnTargets="BaseTarget" Condition="'$(Configuration)' == 'Release'">
+        <MakeDir Directories="$(MSBuildProjectDirectory)/release/$(Version)" />
+        <ZipDirectory SourceDirectory="$(MSBuildProjectDirectory)/staged/$(TargetName)/" DestinationFile="$(MSBuildProjectDirectory)/release/$(Version)/$(TargetName) $(Version).zip" Overwrite="true" />
+    </Target>
+</Project>
