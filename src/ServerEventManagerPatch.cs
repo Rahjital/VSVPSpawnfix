@@ -7,12 +7,24 @@ using Vintagestory.API.MathTools;
 
 using HarmonyLib;
 
+using Vintagestory.API.Server;
+
 namespace VanillaPatch.Spawnfix
 {
+    static class ServerEventAPIPatch
+    {
+        static bool OnTrySpawnEntityAddPrePostfix()
+        {
+            ServerEventManagerPatch.dirty = true;
+
+            return true;
+        }
+    }
+
     [HarmonyPatch(typeof(ServerEventManager))]
     static class ServerEventManagerPatch
     {
-        static bool initialised = false;
+        public static bool dirty = true;
         static MulticastDelegate OnTrySpawnEntityDelegate;
 
         [HarmonyPrefix]
@@ -26,12 +38,12 @@ namespace VanillaPatch.Spawnfix
                 return true;
             }
 
-            if (!initialised)
+            if (dirty)
             {
                 FieldInfo fieldInfo = typeof(ServerEventManager).GetField("OnTrySpawnEntity", BindingFlags.Instance | BindingFlags.NonPublic);
                 OnTrySpawnEntityDelegate = fieldInfo.GetValue(__instance) as MulticastDelegate;
 
-                initialised = true;
+                dirty = false;
             }
 
             if (OnTrySpawnEntityDelegate == null)
@@ -61,7 +73,7 @@ namespace VanillaPatch.Spawnfix
         public static void Dispose()
         {
             OnTrySpawnEntityDelegate = null;
-            initialised = false;
+            dirty = true;
         }
     }
 }
